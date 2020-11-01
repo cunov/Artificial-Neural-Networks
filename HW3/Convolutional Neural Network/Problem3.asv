@@ -1,0 +1,77 @@
+clear all
+dat = LoadData();
+numVisibleNeurons = 9;
+numHiddenNeurons = 16;
+numPatterns = 14;
+W = InitializeWeights(numVisibleNeurons,numHiddenNeurons);
+learningRate = .01;
+% theta = InitializeThresholds(numHiddenNeurons);
+K = 100;
+for v = 1:1000
+    tmp = randperm(numPatterns);
+    p0 = randi(numPatterns);
+    p0 = tmp(1:p0);
+    for mu = p0
+        v = dat(mu,:)';
+        bH = W * v;
+        h = [];
+        for i = 1:numHiddenNeurons
+            if rand < bH(i)
+                h(i) = 1;
+            else
+                h(i) = -1;
+            end
+        end
+        h = h';
+        bV = [];
+        for t = 1:K
+            bV = [bV, (h(:,t)' * W)'];
+            for j = 1:numVisibleNeurons
+                if rand < bV(j,t)
+                    v(j,t+1) = 1;
+                else
+                    v(j,t+1) = -1;
+                end
+            end
+            bH(:,t+1) = W * v(:,t+1);
+            for i = 1:numHiddenNeurons
+                if rand < bH(i,t+1)
+                    h(i,t+1) = 1;
+                else
+                    h(i,t+1) = -1;
+                end
+            end
+        end
+        for m = 1:numHiddenNeurons
+            for n = 1:numVisibleNeurons
+                tmp1 = tanh(bH(m,1))*v(n,1);
+                tmp2 = tanh(bH(m,end))*v(n,end);
+                deltaW{mu}(m,n) = learningRate * (tmp1 - tmp2);
+            end
+        end
+    end
+    for mu = p0
+        for m = 1:numHiddenNeurons
+            for n = 1:numVisibleNeurons
+                W(m,n) = W(m,n) + deltaW{mu}(m,n);
+            end
+        end
+    end
+end
+
+for T=1:20000
+    randPattern = randi([0 1],9,1);
+    randPattern(randPattern==0) = -1;
+    v = randPattern;
+    for i = 1:20
+        
+    % iterate dynamics
+    
+for mu = 1:14
+    if isequal(dat(mu,:),v(:,end)')
+        PB(mu) = PB(mu) + 1;
+    end
+end
+PB = PB / 20000;
+%     for mu = 1:14
+%         DKL(T) = DKL(T) + (1/14)*log( (1/14)
